@@ -1,15 +1,21 @@
 version: '3.4'
 
 services:
-  mitm:
-    image: mitm
-    build:
-      context: .
-      dockerfile: ./Dockerfile
+  service_a:
+    image: service_a
+    build: ./ServiceA
     command: ["sh", "-c", "pip install debugpy -t /tmp && python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5678 -m flask run --no-debugger --no-reload --host 0.0.0.0 --port 5555"]
+    environment:
+      - FLASK_APP=runserver.py
     ports:
       - 5555:5555
-      - 5556:5556
       - 5678:5678
+  service_b:
+    image: service_b
+    build: ./ServiceB/
+    command: ["sh", "-c", "pip install debugpy -t /tmp && python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5679 -m flask run --no-debugger --no-reload --host 0.0.0.0 --port 5556"]
     environment:
-      - FLASK_APP=ServiceB\runserver.py
+      - FLASK_APP=runserver.py
+    ports:
+      - 5556:5556
+      - 5679:5679

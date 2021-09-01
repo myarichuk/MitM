@@ -3,7 +3,7 @@ This script runs the ServiceA application using a development server.
 """
 
 from os import environ
-from ServiceB import app
+from service import app
 
 if __name__ == '__main__':
     HOST = environ.get('SERVER_HOST', 'localhost')
