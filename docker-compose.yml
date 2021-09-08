@@ -4,10 +4,36 @@ services:
   service_a:
     image: service_a
     build: ./ServiceA
+    networks:
+      default:
+        ipv4_address: 10.0.0.2
     ports:
       - 5555:5555
   service_b:
     image: service_b
     build: ./ServiceB/
+    networks:
+      default:
+        ipv4_address: 10.0.0.3    
     ports:
       - 5556:5556
+  mitm:
+    image: mitm
+    privileged: true
+    build: ./MitM
+    networks:
+      default:
+        ipv4_address: 10.0.0.4    
+    volumes:
+      - ./MitM:/mitm    
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv6.conf.all.forwarding=1
+      - net.ipv4.conf.all.send_redirects=0
+networks:
+  default:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 10.0.0.0/24
+         gateway: 10.0.0.1

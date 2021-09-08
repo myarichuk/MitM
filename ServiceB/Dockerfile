@@ -3,8 +3,10 @@ FROM python:3.8-slim-buster
 ENV SERVER_PORT=5555
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
+ENV IN_DOCKER_CONTAINER Yes
 
 # install dependencies
+RUN apt-get update && apt-get install -y iptables tcpdump iproute2 tmux dnsutils
 RUN pip install --upgrade pip
 COPY requirements.txt /tmp/requirements.txt
 RUN python3 -m pip install -r /tmp/requirements.txt
