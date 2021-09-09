@@ -1,0 +1,57 @@
+version: '3.4'
+
+services:
+  service_a:
+    image: service_a
+    volumes:
+      - ./services/configA:/app/config
+    environment: 
+      SERVER_PORT: 5555
+    expose:
+      - "5555"
+    build:
+      context: .
+      dockerfile: ServiceDockerfile
+    networks:
+      default:
+      #static address for convenience sake
+        ipv4_address: 10.0.0.2
+    ports:
+      - 5555:5555
+  service_b:
+    image: service_b
+    volumes:
+      - ./services/configB:/app/config 
+    environment: 
+      SERVER_PORT: 5556
+    expose: 
+      - "5556"
+    build:
+      context: .
+      dockerfile: ServiceDockerfile
+    networks:
+      default:
+      #static address for convenience sake
+        ipv4_address: 10.0.0.3    
+    ports:
+      - 5556:5556
+  mitm:
+    image: mitm
+    privileged: true
+    build: ./MitM
+    networks:
+      default:
+        ipv4_address: 10.0.0.4    
+    volumes:
+      - ./MitM:/mitm    
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv6.conf.all.forwarding=1
+      - net.ipv4.conf.all.send_redirects=0
+networks:
+  default:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 10.0.0.0/24
+         gateway: 10.0.0.1
