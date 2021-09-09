@@ -14,6 +14,7 @@ services:
       dockerfile: ServiceDockerfile
     networks:
       default:
+      #static address for convenience sake
         ipv4_address: 10.0.0.2
     ports:
       - 5555:5555
@@ -30,6 +31,7 @@ services:
       dockerfile: ServiceDockerfile
     networks:
       default:
+      #static address for convenience sake
         ipv4_address: 10.0.0.3    
     ports:
       - 5556:5556
