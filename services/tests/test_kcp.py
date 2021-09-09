@@ -11,6 +11,9 @@ class MockChangeCommunicator(KeyChangeCommunicator):
    def sendSecret(self, secret: str) ->  None:
       self.secretThatWasSent = secret
 
+   def toJson(self) -> str:
+      return ""
+
 def test_will_send_the_key():
    dummyCommunicator = MockChangeCommunicator()
    processHandler = KeyChangeProcess(dummyCommunicator)
