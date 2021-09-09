@@ -1,38 +1,36 @@
 """
-Bob
+Alice
 """
 import os
+
+import configparser
 import random
+
+import json
 from changeprocess import KeyChangeProcess
 from datahandler import KeyChangeDataHandler
-from httpCommunicator import HttpChangeCommunicator
-import configparser
-import json
-
-from changeprocess import KeyChangeProcess
 from httpCommunicator import HttpChangeCommunicator
 from flask_session import Session
 from flask import Flask, session, request, make_response
 
+
 app = Flask(__name__)
 app.secret_key = 'super secret key'
-SESSION_PERMANENT = True
-SESSION_TYPE = 'filesystem'
-
-app.config.from_object(__name__)
-
+app.config['SESSION_PERMANENT'] = True
+app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
 
 IS_IN_DOCKER = os.environ.get('IN_DOCKER_CONTAINER', False)
 
 config = configparser.ConfigParser()
+config.read('config/serviceConfig.ini')
 
 if IS_IN_DOCKER:
-    config.read('serviceConfig.ini')
     url: str = config['otherService']['dockerUrl']
 else:
-    config.read('./services/ServiceB/serviceConfig.ini')
     url: str = config['otherService']['localUrl']
+
+#url = 'http://localhost:5000'
 
 def storeInstance(kcp: KeyChangeProcess):
     session['first'] = kcp.dataHandler.first
@@ -56,10 +54,7 @@ def getKeyChangeProcess():
 
 @app.route('/')
 def hello():
-    if 'counter' not in session:
-        session['counter'] = 0
-    session['counter'] = session['counter'] + 1        
-    return "<h1>Hello World! (from Bob) counter = " + str(session['counter']) + "</h1>"
+    return "<h1>Hello World! (from Alice)</h1>"
 
 
 @app.route('/changekey')
