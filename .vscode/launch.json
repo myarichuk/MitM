@@ -1,5 +1,6 @@
 {
    "configurations": [
+      
       {
          "name": "Debug Local: ServiceA",
          "type": "python",
@@ -65,6 +66,6 @@
             ],
             "projectType": "flask"
          }
-      }
+      }     
    ]
 }
