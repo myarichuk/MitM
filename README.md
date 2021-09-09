@@ -8,3 +8,5 @@ This is a small repository that reproduces a [man-in-the-middle attack](https://
 4. Start **MITMPROXY** interface by running *mitmproxy -m transparent -s ./mitm/proxy.py*
 5. Issue an *HTTP* request to **http://localhost:5555/changekey?newkey=foobar123**
 6. The following log entries at **MITMPROXY** interface should appear (switch to log mode by pressing *shift + E*, capital 'e')
+
+![decoded secret](decoded_secret.JPG)
