@@ -6,13 +6,21 @@ class HttpChangeCommunicator(KeyChangeCommunicator):
    def __init__(self, url: str) -> None:
        super().__init__()
        self.url = url
+       self.session = requests.Session() 
  
    def sendNumbers(self, myNumbers: tuple[int, int]) -> tuple[int, int]:
       myNumbers = {'first':myNumbers[0], 'second':myNumbers[1] }      
-      response = requests.put(self.host + "/handshake", params = myNumbers)
+      response = self.session.put(self.url + "/handshake", params = myNumbers)
       responseJson = json.loads(response.text)
 
-      return int(responseJson['first']), int(responseJson['second'])
+      return int(responseJson[0]), int(responseJson[1])
  
    def sendSecret(self, encryptedSecret: str) ->  None:
-      requests.post(self.host + "/secret", json = { 'secret': encryptedSecret })
+      self.session.post(self.url + "/secret", json = { 'secret': encryptedSecret })
+
+   def toJson(self) -> str:
+      return json.dumps({ 'url': self.url })
+
+   def fromJson(kccJson: str) -> KeyChangeCommunicator:
+      parsed = json.loads(kccJson)
+      return HttpChangeCommunicator(str(parsed['url']))

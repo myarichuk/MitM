@@ -11,6 +11,10 @@ class KeyChangeCommunicator(ABC):
    def sendSecret(self, secret: str) ->  None:
       pass
 
+   @abstractmethod
+   def toJson(self) -> str:
+      pass
+
 class KeyChangeProcess:
    def __init__(self, communicator: KeyChangeCommunicator):
       self.dataHandler = KeyChangeDataHandler()

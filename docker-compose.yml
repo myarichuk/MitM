@@ -3,7 +3,9 @@ version: '3.4'
 services:
   service_a:
     image: service_a
-    build: ./ServiceA
+    build:
+      context: .
+      dockerfile: Dockerfile_ServiceA
     networks:
       default:
         ipv4_address: 10.0.0.2
@@ -11,7 +13,9 @@ services:
       - 5555:5555
   service_b:
     image: service_b
-    build: ./ServiceB/
+    build:
+      context: .
+      dockerfile: Dockerfile_ServiceB
     networks:
       default:
         ipv4_address: 10.0.0.3    

@@ -2,50 +2,93 @@
 Bob
 """
 import os
-from controller import app
-import configparser
-from httpCommunicator import HttpChangeCommunicator
-from changeprocess import KeyChangeProcess
-from flask import request, make_response
-import json
 import random
+from changeprocess import KeyChangeProcess
+from datahandler import KeyChangeDataHandler
+from httpCommunicator import HttpChangeCommunicator
+import configparser
+import json
+
+from changeprocess import KeyChangeProcess
+from httpCommunicator import HttpChangeCommunicator
+from flask_session import Session
+from flask import Flask, session, request, make_response
+
+app = Flask(__name__)
+app.secret_key = 'super secret key'
+SESSION_PERMANENT = True
+SESSION_TYPE = 'filesystem'
+
+app.config.from_object(__name__)
+
+Session(app)
 
 IS_IN_DOCKER = os.environ.get('IN_DOCKER_CONTAINER', False)
 
 config = configparser.ConfigParser()
-config.read('serviceConfig.ini')
 
 if IS_IN_DOCKER:
-    url: str = 'http://service_a:5555'#config['otherService']['dockerUrl']
+    config.read('serviceConfig.ini')
+    url: str = config['otherService']['dockerUrl']
 else:
-    url: str = 'http://localhost:5555'#config['otherService']['dockerUrl']
+    config.read('./services/ServiceB/serviceConfig.ini')
+    url: str = config['otherService']['localUrl']
 
-currentKeyChangeProcess: KeyChangeProcess
+def storeInstance(kcp: KeyChangeProcess):
+    session['first'] = kcp.dataHandler.first
+    session['second'] = kcp.dataHandler.second
+    session['third'] = kcp.dataHandler.third
+    session['fourth'] = kcp.dataHandler.fourth
+    session['initialized'] = True
+    return kcp
+
+def getKeyChangeProcess():
+    def getNewInstance(otherUrl: str) -> KeyChangeProcess:
+        return KeyChangeProcess(HttpChangeCommunicator(otherUrl))
+
+    if 'initialized' not in session:
+        return storeInstance(getNewInstance(url))
+
+    instance = KeyChangeProcess(HttpChangeCommunicator(url))
+    instance.dataHandler = KeyChangeDataHandler.fromJson({ 'first': session['first'], 'second': session['second'], 'third': session['third'], 'fourth': session['fourth'] })
+
+    return instance
 
 @app.route('/')
 def hello():
-    return "<h1>Hello World! (from Bob)</h1>"
+    if 'counter' not in session:
+        session['counter'] = 0
+    session['counter'] = session['counter'] + 1        
+    return "<h1>Hello World! (from Bob) counter = " + str(session['counter']) + "</h1>"
 
-@app.route('/changekey', methods=['GET'])
+
+@app.route('/changekey')
 def changekey():
-    currentKeyChangeProcess = KeyChangeProcess(HttpChangeCommunicator(url))
     newKey: str = request.args.get('newkey')
-    if(newKey is None): #just in case...
+
+    # just in case...
+    if newKey is None or '':
         newKey = random.randint(5, 10000)
-    currentKeyChangeProcess.doKeyChange()
-    return make_response(json.dump({ 'message': 'OK'}),200)
+    keyChangeProcess = getKeyChangeProcess()
+    keyChangeProcess.doKeyChange(newKey)
+    storeInstance(keyChangeProcess)
+    session['secret'] = newKey
+    return json.dumps({ 'message': 'OK'})
+
 
 @app.route('/handshake', methods=['PUT'])
 def handshake():
-    currentKeyChangeProcess = KeyChangeProcess(HttpChangeCommunicator(url))
     first = int(request.args.get('first'))
     second = int(request.args.get('second'))
-    
-    return currentKeyChangeProcess.continueChangeKey(first, second)
+    keyChangeProcess = getKeyChangeProcess()
+    my = keyChangeProcess.continueChangeKey((first, second))
+    storeInstance(keyChangeProcess)
+    return json.dumps(my)
 
-@app.route('/secret', methods=['POST', 'GET'])
+
+@app.route('/secret', methods=['POST'])
 def secret():
-    if request.method == 'POST':
-        currentKeyChangeProcess.receiveNewKey(request.get_json()['secret'])
-    else:
-        return make_response(json.dump({ 'secret': currentKeyChangeProcess.newKey }), 200)
+    newKey = request.get_json()['secret']
+    getKeyChangeProcess().receiveNewKey(newKey)
+    session['secret'] = newKey
+    return { 'message': 'OK' }

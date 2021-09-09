@@ -7,7 +7,7 @@
          "request": "launch",
          "module": "flask",
          "env": {
-            "FLASK_APP": "ServiceA/runserver.py",
+            "FLASK_APP": "services/ServiceA/runserver.py",
             "FLASK_ENV": "development"
          },
          "args": [
@@ -22,7 +22,7 @@
          "request": "launch",
          "module": "flask",
          "env": {
-            "FLASK_APP": "ServiceB/runserver.py",
+            "FLASK_APP": "services/ServiceB/runserver.py",
             "FLASK_ENV": "development"
          },
          "args": [
