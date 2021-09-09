@@ -9,4 +9,6 @@ This is a small repository that reproduces a [man-in-the-middle attack](https://
 5. Issue an *HTTP* request to **http://localhost:5555/changekey?newkey=foobar123** (or any other new key). This will initiate a key changing protocol.
 6. The following log entries at **MITMPROXY** interface should appear (switch to log mode by pressing *shift + E*, capital 'e')
 
+*credit: this experiment is based on the excellent demo here: https://github.com/kientuong114/docker-mitm*
+
 ![decoded secret](decoded_secret.JPG)
